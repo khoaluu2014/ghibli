@@ -2,22 +2,32 @@ import numpy as np
 from PIL import Image
 from sklearn.cluster import KMeans
 import colorsys
+import os
 
 # pass in the img that we want
 # TODO make it a prompt instead of hardcoded
-img_path = "./img/thewindrises2.jpg"
-
+PATH = "./img/thewindrises/"
+all_pixels = []
 # convert the image to RGB to ensure consistency
-img = Image.open(img_path).convert("RGB")
-
-# scale the image down for effciency
-img.thumbnail((100, 100))
-
-# flatten array of img from 3D (width, height, 3) to 2D (width * height, 3)
-pixels = np.array(img).reshape(-1, 3)
-
+for filename in os.listdir(PATH):
+    if filename.lower().endswith("jpg"):
+        img_path = os.path.join(PATH, filename)
+        try:
+            img = Image.open(img_path).convert("RGB")
+            # scale the image down for effciency
+            img.thumbnail((100, 100))
+            # flatten array of img from 3D (width, height, 3) to 2D (width * height, 3)
+            pixels = np.array(img).reshape(-1, 3)
+            print(f"Processed {filename}.")
+            all_pixels.append(pixels)
+        except Exception as e:
+            print(f"Error: {e}")
 # number of dominant colors we want to extract
-N_COLORS = 8
+pixels = []
+if all_pixels:
+    pixels = np.concatenate(all_pixels, axis=0)
+
+N_COLORS = 12
 RANDOM_STATE = 42
 
 # Use K Means clustering on the image
@@ -65,7 +75,7 @@ dominant_colors_in_hex = []
 for r, g, b in dominant_colors_in_rgb:
     dominant_colors_in_hex.append(f"#{r:02x}{g:02x}{b:02x}")
 
-print("palette: ", dominant_colors_in_hex)
+print("Normal: ", dominant_colors_in_hex)
 print("Lighter: ", lighter_palette)
 print("Darker: ", darker_pallete)
 
